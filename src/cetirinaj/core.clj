@@ -27,7 +27,7 @@
            work-sizes (work-size [1])
            program-source
            (slurp (io/reader "examples/hello-kernel.cl" ))]
-       (println "program-source Section 4.1, Page 69.: " program-source) 
+       (println "program-source Section 4.1, Page 69.: --------------------------------" program-source) 
        (with-release [cl-msg (cl-buffer ctx 16 :write-only)
                       prog (build-program! (program-with-source ctx [program-source]))
                       hello-kernel (kernel prog "hello_kernel")
@@ -46,14 +46,16 @@
 
     (facts
      (println "Section 4.2, Page 72.")
-     (let [host-a (float-array 10)
-           host-b (float-array 2)
+     (let [host-a (float-array [10])
+           host-b (float-array [2])
            host-out (float-array 1)
            work-sizes (work-size [1])
            program-source
            (slurp (io/reader "examples/double-test.cl"))]
        
-       (println "program-source Section 4.2, Page 72.: " )
+       (println "program-source Section 4.2, Page 72.--------------------------: " program-source)
+       (println "(seq host-out): " (seq host-out))
+       (println "(map / host-a host-b): " (map / host-a host-b))
        
        (with-release [cl-a (cl-buffer ctx (* 2 Float/BYTES) :read-only)
                       cl-b (cl-buffer ctx (* 2 Float/BYTES) :read-only)
@@ -65,18 +67,24 @@
                                              "")
                                            notifications)
                       double-test (kernel prog "double_test")]
-
+             (println "mmmmmmmmmm")
          (set-args! double-test cl-a cl-b cl-out) => double-test
          (enq-write! cqueue cl-a host-a) => cqueue
          (enq-write! cqueue cl-b host-b) => cqueue
          (enq-nd! cqueue double-test work-sizes) => cqueue
          (enq-read! cqueue cl-out host-out) => cqueue
-         (seq host-out) => (map / host-a host-b)))
+         
+         (println "(seq host-out): " (seq host-out))
+         (println "(seq host-a): " (seq host-a))
+         (println "(seq host-b): " (seq host-b))         
+         (println "(map * host-a host-b): " (map * host-a host-b))
+         
+         (seq host-out) => (map * host-a host-b)))
              (println "nnnnnnnnnn")      
      )
 
     (facts
-     (println "Section 4.3, Page 77.")
+     (println "Section 4.3, Page 77.--------------------------------")
      (println "Single FP Config: " (info dev :single-fp-config)))
 
     (facts
@@ -91,7 +99,7 @@
                                        :preferred-vector-width-long])))
 
     (facts
-     "Section 4.4.4, Page 85."
+     "Section 4.4.4, Page 85.------------------------------"
      (let [host-data (byte-array 16)
            work-sizes (work-size [1])
            program-source
